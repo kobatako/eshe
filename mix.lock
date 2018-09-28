@@ -1,0 +1,5 @@
+%{
+  "brook": {:git, "https://github.com/kobatako/brook.git", "cd6fbe7615f1bcc0d3548ef01834ceaf2f347f72", [branch: "master"]},
+  "dep_from_git": {:git, "https://github.com/kobatako/brook.git", "cd6fbe7615f1bcc0d3548ef01834ceaf2f347f72", [branch: "master"]},
+  "procket": {:git, "git://github.com/msantos/procket.git", "032cc0f8c6b479ffcbedc5b5ae6847bf89e7944d", [tag: "0.9.3"]},
+}
