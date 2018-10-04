@@ -8,9 +8,6 @@ defmodule Eshe do
 
   ## Examples
 
-      iex> Eshe.hello()
-      :world
-
   """
   use Supervisor
 
@@ -21,8 +18,8 @@ defmodule Eshe do
   def init([]) do
     children = [
       %{
-        id: ExAviso.Supervisor,
-        start: {ExAviso.Supervisor, :start_link, []},
+        id: Eshe.Supervisor,
+        start: {Eshe.Supervisor, :start_link, []},
         type: :supervisor
       }
     ]
