@@ -1,31 +1,57 @@
 defmodule Eshe.Router do
-  defmacro static(identifier \\ "global", attrs \\ [], do: context) do
-    IO.inspect identifier
-    do_static(identifier, attrs, context)
-    # interface_ip:
-    # dest_ip:
-    # dest_prefix:
-    # interface:
+  defmacro route(identifier \\ :global, attrs \\ [], do: context) do
+    do_route(identifier, attrs, context)
   end
 
-  def record!(module, identifier, attrs, context) do
+  defp do_route(identifier, attrs, block) when is_atom(identifier) do
+    quote do
+      Module.register_attribute(__MODULE__, :change_route, accumulate: true)
+      Module.register_attribute(__MODULE__, :static_route, accumulate: true)
+      identifier = unquote(identifier)
+      attrs = unquote(attrs)
+      Module.put_attribute(__MODULE__, :change_route, {:identifier, identifier})
+
+      try do
+        unquote(block)
+      after
+        :ok
+      end
+
+      Eshe.Router.merge_route(__MODULE__, @change_route)
+      loaded = Eshe.Router.__load__(__MODULE__, @change_route)
+      Module.put_attribute(__MODULE__, :static_route, loaded)
+    end
   end
 
-  defp do_static(identifier, attrs, block) do
-    IO.inspect "do static"
-    record!(__MODULE__, identifier, attrs, block)
+  def merge_route(module, strcut) do
+    field = Module.get_attribute(module, :change_route)
+    route = for {:route_record, [r]} <- field, do: r
+    Module.put_attribute(module, :change_route, {:route, route})
   end
 
-  # route(add, static, #{dest_route := {D1, D2, D3, D4}, subnetmask := {S1, S2, S3, S4},
-  # nexthop := Nexthop, out_interface := OutInterface}) ->
+  def __load__(module, struct) do
+    change_route = Map.new(struct)
+    Map.delete(change_route, :route_record)
+  end
+
   defmacro add(c) when is_list(c) do
-    IO.inspect "add is list"
-    IO.inspect c
+    quote do
+      Eshe.Router.__add__(__MODULE__, unquote(c))
+    end
   end
 
-  defmacro add(c) when is_map(c) do
-    IO.inspect "add is map"
-    IO.inspect c
+  def __add__(module, c) do
+    Module.put_attribute(module, :change_route, {:route_record, [Map.new(c)]})
+  end
+
+  defmacro route_through(identifier) do
+    quote do
+      identifier = unquote(identifier)
+      route = for %{identifier: id, route: route} <- @static_route, identifier == id, do: route
+
+      route
+      |> List.flatten()
+      |> Enum.map(fn r -> :brook_ip.route(:add, :static, r) end)
+    end
   end
 end
-
