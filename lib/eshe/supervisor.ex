@@ -6,21 +6,15 @@ defmodule Eshe.Supervisor do
 
   firewall :default do
     allow(
-      source_ip: {0, 0, 0, 0},
-      source_netmask: {255, 2555, 255, 0},
-      dest_ip: nil,
-      dest_netmask: {255, 255, 255, 0},
-      dest_port: 80
+      source_ip: {192, 168, 0, 0},
+      source_netmask: {255, 255, 255, 0}
     )
-
     deny(
       source_ip: {192, 168, 20, 0},
-      source_netmask: {255, 2555, 255, 0},
-      dest_ip: {0, 0, 0, 0},
+      source_netmask: {255, 255, 255, 0},
+      dest_ip: {192, 168, 10, 0},
       dest_netmask: {255, 255, 255, 0}
     )
-
-    allow(source_ip: {192, 168, 0, 0}, source_netmask: {255, 2555, 255, 0})
     deny()
   end
 
