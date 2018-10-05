@@ -23,7 +23,7 @@ defmodule Eshe.MixProject do
   defp deps do
     [
       # {:dep_from_hexpm, "~> 0.3.0"},
-      {:brook, git: "https://github.com/kobatako/brook.git", branch: "master"},
+      {:brook, git: "https://github.com/kobatako/brook.git", branch: "master"}
     ]
   end
 end
