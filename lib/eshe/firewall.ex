@@ -93,18 +93,22 @@ defmodule Eshe.Firewall do
 
   defmacro firewall_through(identifier) do
     quote do
-      :brook_pipeline.save_after_ip_filter(Eshe.Firewall, :firewall_filter)
+      identifier = unquote(identifier)
+      :brook_pipeline.save_after_ip_filter(Eshe.Firewall.firewall_filter(identifier))
     end
   end
 
-  def firewall_filter(data, option) do
-    filter = fetch_filter(Eshe.Supervisor.route_firewall(), :default)
-    case is_allow_filter(filter, data) do
-      :ok ->
-        {:ok, data, option}
+  def firewall_filter(identifier) do
+    filter = fetch_filter(Eshe.Supervisor.route_firewall(), identifier)
 
-      error ->
-        {:error, error}
+    fn(data, option) ->
+      case is_allow_filter(filter, data) do
+        :ok ->
+          {:ok, data, option}
+
+        error ->
+          {:error, error}
+      end
     end
   end
 

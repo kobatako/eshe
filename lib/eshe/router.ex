@@ -1,4 +1,27 @@
 defmodule Eshe.Router do
+  @moduledoc """
+
+  route do
+    add(
+      dest_route: {192, 168, 20, 0},
+      subnetmask: {255, 255, 255, 0},
+      nexthop: {},
+      out_interface: :eth1
+    )
+
+    add(
+      dest_route: {192, 168, 30, 0},
+      subnetmask: {255, 255, 255, 0},
+      nexthop: {},
+      out_interface: :eth0
+    )
+  end
+
+  def init() do
+    route_through(:global)
+  end
+
+  """
   defmacro route(identifier \\ :global, attrs \\ [], do: context) do
     do_route(identifier, attrs, context)
   end
