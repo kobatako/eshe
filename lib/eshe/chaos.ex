@@ -22,6 +22,17 @@ defmodule Eshe.Chaos do
     rate: 100
   }
 
+  @default_duplicate_record %{
+    source_ip: nil,
+    source_netmask: nil,
+    dest_ip: nil,
+    dest_netmask: nil,
+    source_port: nil,
+    dest_port: nil,
+    protocol: :ip,
+    rate: 100
+  }
+
   defmacro chaos(identifier \\ :global, attrs \\ [], do: context) do
     do_chaos(identifier, attrs, context)
   end
@@ -69,6 +80,13 @@ defmodule Eshe.Chaos do
     end
   end
 
+  defmacro duplicate(c) do
+    quote do
+      c = unquote(c)
+      Eshe.Chaos.__duplicate__(__MODULE__, Map.new(c))
+    end
+  end
+
   def __delay__(module, c) do
     record = Map.merge(@default_delay_record, c)
     Module.put_attribute(module, :change_chaos_record, {:delay, record})
@@ -79,11 +97,26 @@ defmodule Eshe.Chaos do
     Module.put_attribute(module, :change_chaos_record, {:loss, record})
   end
 
+  def __duplicate__(module, c) do
+    record = Map.merge(@default_duplicate_record, c)
+    Module.put_attribute(module, :change_chaos_record, {:duplicate, record})
+  end
+
   defmacro chaos_through(identifier) do
     quote do
       identifier = unquote(identifier)
       :brook_pipeline.save_before_ip_pipeline(Eshe.Chaos.chaos_pipeline(identifier))
+      :brook_pipeline.save_after_send_pipeline(Eshe.Chaos, :send_after_packet)
     end
+  end
+
+  def send_after_packet(data, option) do
+    dupl = Map.get(option, :duplicate, false)
+    if dupl do
+      <<ether :: size(112), send_data :: binary >> = data
+      :brook_sender.send_packet(:ip_request, {send_data, %{option| duplicate: false}})
+    end
+    {:ok, data, option}
   end
 
   def chaos_pipeline(identifier) do
@@ -142,6 +175,20 @@ defmodule Eshe.Chaos do
       ran = trunc(:rand.uniform() * 100)
       if rate >= ran do
         {:error, {{:message, :chaos_type_loss}, {:record, record}, {:data, data}}}
+      else
+        {:ok, data, option}
+      end
+    else
+      {:ok, data, option}
+    end
+  end
+
+  def chaos_type_pipeline({:duplicate, record}, data, option) do
+    if Eshe.Firewall.match(record, data) do
+      rate = record[:rate]
+      ran = trunc(:rand.uniform() * 100)
+      if rate >= ran do
+        {:ok, data, Map.merge(%{duplicate: true}, option)}
       else
         {:ok, data, option}
       end
