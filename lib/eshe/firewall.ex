@@ -118,7 +118,7 @@ defmodule Eshe.Firewall do
   def firewall_filter(identifier) do
     filter = fetch_filter(Eshe.Supervisor.route_firewall(), identifier)
 
-    fn(data, option) ->
+    fn data, option ->
       case is_allow_filter(filter, data) do
         :ok ->
           {:ok, data, option}
@@ -144,8 +144,10 @@ defmodule Eshe.Firewall do
     case record_filter(head, data) do
       :ok ->
         :ok
+
       :error ->
         {:error, :bad_match}
+
       :next ->
         is_allow_filter(tail, data)
     end
@@ -166,7 +168,6 @@ defmodule Eshe.Firewall do
       :next
     end
   end
-
 
   @doc """
 
@@ -282,16 +283,20 @@ defmodule Eshe.Firewall do
     ...>  }, <<4 :: size(4), 5 :: size(4), 0 :: size(88), 192, 168, 20, 10, 192, 168, 10, 10, 8, 00, 00, 80>>)
     false
   """
-  def match(%{protocol: protocol} = record, <<version :: size(4), len :: size(4), _head :: size(88), source_ip :: size(32), dest_ip :: size(32), other :: binary>>) when protocol in [:tcp, :udp] do
+  def match(
+        %{protocol: protocol} = record,
+        <<version::size(4), len::size(4), _head::size(88), source_ip::size(32), dest_ip::size(32),
+          other::binary>>
+      )
+      when protocol in [:tcp, :udp] do
     {source_port, dest_port} = fetch_port(len, other)
 
     with res <- match_ip([], record[:dest_ip], record[:dest_netmask], dest_ip),
-     res <- match_ip(res, record[:source_ip], record[:source_netmask], source_ip),
-     res <- match_port(res, record[:source_port], source_port),
-     res <- match_port(res, record[:dest_port], dest_port),
-     res <- Enum.filter(res, &(&1 != nil)),
-    {:ok, _value} <- Enum.fetch(res, 0)
-    do
+         res <- match_ip(res, record[:source_ip], record[:source_netmask], source_ip),
+         res <- match_port(res, record[:source_port], source_port),
+         res <- match_port(res, record[:dest_port], dest_port),
+         res <- Enum.filter(res, &(&1 != nil)),
+         {:ok, _value} <- Enum.fetch(res, 0) do
       Enum.all?(res, fn r -> r == true end)
     else
       _ ->
@@ -299,18 +304,22 @@ defmodule Eshe.Firewall do
     end
   end
 
-  def match(record, <<version :: size(4), len :: size(4), _head :: size(88), source_ip :: size(32), dest_ip :: size(32), other :: binary>>) do
+  def match(
+        record,
+        <<version::size(4), len::size(4), _head::size(88), source_ip::size(32), dest_ip::size(32),
+          other::binary>>
+      ) do
     with res <- match_ip([], record[:dest_ip], record[:dest_netmask], dest_ip),
-     res <- match_ip(res, record[:source_ip], record[:source_netmask], source_ip),
-     res <- Enum.filter(res, &(&1 != nil)),
-    {:ok, _value} <- Enum.fetch(res, 0)
-    do
+         res <- match_ip(res, record[:source_ip], record[:source_netmask], source_ip),
+         res <- Enum.filter(res, &(&1 != nil)),
+         {:ok, _value} <- Enum.fetch(res, 0) do
       Enum.all?(res, fn r -> r == true end)
     else
       _ ->
         false
     end
   end
+
   @doc """
 
     match ip address in firewall record filter
@@ -340,16 +349,18 @@ defmodule Eshe.Firewall do
 
   """
   def match_ip(res, nil, _record_netmask, _ip) do
-      [nil| res]
+    [nil | res]
   end
+
   def match_ip(res, _record_ip, nil, _ip) do
-      [nil| res]
+    [nil | res]
   end
+
   def match_ip(res, record_ip, record_netmask, ip) do
-    if band(trace_to_integer_ip_addr(record_netmask), ip) == trace_to_integer_ip_addr(record_ip)  do
-      [true| res]
+    if band(trace_to_integer_ip_addr(record_netmask), ip) == trace_to_integer_ip_addr(record_ip) do
+      [true | res]
     else
-      [false| res]
+      [false | res]
     end
   end
 
@@ -388,44 +399,44 @@ defmodule Eshe.Firewall do
     [false]
   """
   def match_port(res, nil, _port) do
-      [nil| res]
+    [nil | res]
   end
 
   def match_port(res, _port, nil) do
-      [nil| res]
+    [nil | res]
   end
 
   def match_port(res, {min, max}, port) do
     if port in min..max do
-      [true| res]
+      [true | res]
     else
-      [false| res]
+      [false | res]
     end
   end
 
   def match_port(res, record_port, port) when is_list(record_port) do
     if port in record_port do
-      [true| res]
+      [true | res]
     else
-      [false| res]
+      [false | res]
     end
   end
 
   def match_port(res, record_port, port) do
     if record_port == port do
-      [true| res]
+      [true | res]
     else
-      [false| res]
+      [false | res]
     end
   end
 
   def trace_to_tuple_ip_addr(ip) when is_integer(ip) do
-    <<i1, i2, i3, i4>> = <<ip :: size(32)>>
+    <<i1, i2, i3, i4>> = <<ip::size(32)>>
     {i1, i2, i3, i4}
   end
 
   def trace_to_integer_ip_addr({i1, i2, i3, i4}) do
-    <<ip :: size(32)>> = <<i1, i2, i3, i4>>
+    <<ip::size(32)>> = <<i1, i2, i3, i4>>
     ip
   end
 
@@ -436,9 +447,10 @@ defmodule Eshe.Firewall do
   defp fetch_port(len, data) do
     packet_len = len * 4 * 8
     ip_header = 160 - packet_len
-    <<ip_options :: size(ip_header), other :: binary >> = data
+    <<ip_options::size(ip_header), other::binary>> = data
+
     if byte_size(other) <= 4 do
-      <<source_port :: size(16), dest_port :: size(16), _ :: binary>> = other
+      <<source_port::size(16), dest_port::size(16), _::binary>> = other
       {source_port, dest_port}
     else
       {nil, nil}
