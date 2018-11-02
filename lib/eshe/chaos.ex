@@ -11,6 +11,17 @@ defmodule Eshe.Chaos do
     rate: 100
   }
 
+  @default_loss_record %{
+    source_ip: nil,
+    source_netmask: nil,
+    dest_ip: nil,
+    dest_netmask: nil,
+    source_port: nil,
+    dest_port: nil,
+    protocol: :ip,
+    rate: 100
+  }
+
   defmacro chaos(identifier \\ :global, attrs \\ [], do: context) do
     do_chaos(identifier, attrs, context)
   end
@@ -51,9 +62,21 @@ defmodule Eshe.Chaos do
     end
   end
 
+  defmacro loss(c) do
+    quote do
+      c = unquote(c)
+      Eshe.Chaos.__loss__(__MODULE__, Map.new(c))
+    end
+  end
+
   def __delay__(module, c) do
     record = Map.merge(@default_delay_record, c)
     Module.put_attribute(module, :change_chaos_record, {:delay, record})
+  end
+
+  def __loss__(module, c) do
+    record = Map.merge(@default_loss_record, c)
+    Module.put_attribute(module, :change_chaos_record, {:loss, record})
   end
 
   defmacro chaos_through(identifier) do
@@ -70,9 +93,8 @@ defmodule Eshe.Chaos do
       case chaos_pipeline(chaos, data, option) do
         {:ok, data, option} ->
           {:ok, data, option}
-
-        error ->
-          {:error, error}
+        err ->
+          err
       end
     end
   end
@@ -109,6 +131,20 @@ defmodule Eshe.Chaos do
       end
 
       {:ok, data, option}
+    else
+      {:ok, data, option}
+    end
+  end
+
+  def chaos_type_pipeline({:loss, record}, data, option) do
+    if Eshe.Firewall.match(record, data) do
+      rate = record[:rate]
+      ran = trunc(:rand.uniform() * 100)
+      if rate >= ran do
+        {:error, {{:message, :chaos_type_loss}, {:record, record}, {:data, data}}}
+      else
+        {:ok, data, option}
+      end
     else
       {:ok, data, option}
     end

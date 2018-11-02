@@ -65,6 +65,12 @@ defmodule Eshe.Supervisor do
       milisec: 1000,
       rate: 50
     )
+    loss(
+      source_ip: {192, 168, 20, 0},
+      source_netmask: {255, 255, 255, 0},
+      protocol: :tcp,
+      rate: 50
+    )
   end
 
   def start_link() do
