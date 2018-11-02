@@ -84,15 +84,28 @@ defmodule Eshe.Pipeline do
   end
 
   def __line__(module, %{filter: _filter, func: _func} = record) do
-    Module.put_attribute(module, :change_pipeline_record, Map.merge(%{module: __MODULE__}, record))
+    Module.put_attribute(
+      module,
+      :change_pipeline_record,
+      Map.merge(%{module: __MODULE__}, record)
+    )
   end
 
   defmacro pipeline_through(identifier) do
     quote do
       pipeline = Eshe.Pipeline.fetch_filter(__MODULE__.route_pipeline(), unquote(identifier))
-      before_ip_filter =  for  %{filter: :before_ip, module: module, func: func} <- pipeline, do: %{module: module, func: func}
-      after_ip_filter =  for  %{filter: :after_ip, module: module, func: func} <- pipeline, do: %{module: module, func: func}
-      after_send_filter =  for  %{filter: :after_send, module: module, func: func} <- pipeline, do: %{module: module, func: func}
+
+      before_ip_filter =
+        for %{filter: :before_ip, module: module, func: func} <- pipeline,
+            do: %{module: module, func: func}
+
+      after_ip_filter =
+        for %{filter: :after_ip, module: module, func: func} <- pipeline,
+            do: %{module: module, func: func}
+
+      after_send_filter =
+        for %{filter: :after_send, module: module, func: func} <- pipeline,
+            do: %{module: module, func: func}
 
       before_ip_pipeline_filter(before_ip_filter)
       after_ip_pipeline_filter(after_ip_filter)
@@ -101,38 +114,44 @@ defmodule Eshe.Pipeline do
   end
 
   def before_ip_pipeline(filter) do
-    for %{module: module, func: func} <- filter, do: :brook_pipeline.save_before_ip_filter(module, func)
+    for %{module: module, func: func} <- filter,
+        do: :brook_pipeline.save_before_ip_pipeline(module, func)
   end
 
   def after_ip_pipeline(filter) do
-    for %{module: module, func: func} <- filter, do: :brook_pipeline.save_after_ip_filter(module, func)
+    for %{module: module, func: func} <- filter,
+        do: :brook_pipeline.save_after_ip_pipeline(module, func)
   end
 
   def after_send_pipeline(filter) do
-    for %{module: module, func: func} <- filter, do: :brook_pipeline.save_after_send_filter(module, func)
+    for %{module: module, func: func} <- filter,
+        do: :brook_pipeline.save_after_send_pipeline(module, func)
   end
 
   def before_tcp_pipeline(filter) do
-    for %{module: module, func: func} <- filter, do: :brook_pipeline.save_before_tcp_filter(module, func)
+    for %{module: module, func: func} <- filter,
+        do: :brook_pipeline.save_before_tcp_pipeline(module, func)
   end
 
   def after_tcp_pipeline(filter) do
-    for %{module: module, func: func} <- filter, do: :brook_pipeline.save_after_tcp_filter(module, func)
+    for %{module: module, func: func} <- filter,
+        do: :brook_pipeline.save_after_tcp_pipeline(module, func)
   end
 
-
   def before_udp_pipeline(filter) do
-    for %{module: module, func: func} <- filter, do: :brook_pipeline.save_before_udp_filter(module, func)
+    for %{module: module, func: func} <- filter,
+        do: :brook_pipeline.save_before_udp_pipeline(module, func)
   end
 
   def after_udp_pipeline(filter) do
-    for %{module: module, func: func} <- filter, do: :brook_pipeline.save_after_udp_filter(module, func)
+    for %{module: module, func: func} <- filter,
+        do: :brook_pipeline.save_after_udp_pipeline(module, func)
   end
 
   def fetch_filter(route_pipeline, identifier) do
     record = for %{identifier: id, record: record} <- route_pipeline, identifier == id, do: record
+
     record
     |> List.flatten()
   end
 end
-
