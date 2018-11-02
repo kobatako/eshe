@@ -188,7 +188,6 @@ defmodule Eshe.Chaos do
       rate = record[:rate]
       ran = trunc(:rand.uniform() * 100)
       if rate >= ran do
-        IO.inspect "duplicate"
         {:ok, data, Map.merge(%{duplicate: true}, option)}
       else
         {:ok, data, option}
