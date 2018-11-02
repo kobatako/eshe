@@ -8,6 +8,7 @@ defmodule Eshe.Firewall do
   use Bitwise
 
   @single_host_prefix {255, 255, 255, 255}
+  @zero_host {0, 0, 0, 0}
   @all_host_prefix {0, 0, 0, 0}
 
   @default_firewall_record %{
@@ -135,11 +136,11 @@ defmodule Eshe.Firewall do
     |> List.flatten()
   end
 
-  defp is_allow_filter([], _) do
+  def is_allow_filter([], _) do
     :ok
   end
 
-  defp is_allow_filter([head | tail], data) do
+  def is_allow_filter([head | tail], data) do
     case record_filter(head, data) do
       :ok ->
         :ok
@@ -214,7 +215,7 @@ defmodule Eshe.Firewall do
     ...>      dest_ip: nil,
     ...>      dest_netmask: nil,
     ...>      dest_port: 80,
-    ...>      protocol: nil,
+    ...>      protocol: :tcp,
     ...>      source_ip: nil,
     ...>      source_netmask: nil,
     ...>      source_port: nil
@@ -225,8 +226,8 @@ defmodule Eshe.Firewall do
     iex> Eshe.Firewall.match(%{
     ...>      dest_ip: nil,
     ...>      dest_netmask: nil,
-    ...>      dest_port: nil,
-    ...>      protocol: 8080,
+    ...>      dest_port: 8080,
+    ...>      protocol: :tcp,
     ...>      source_ip: nil,
     ...>      source_netmask: nil,
     ...>      source_port: nil
@@ -262,7 +263,7 @@ defmodule Eshe.Firewall do
     ...>      dest_ip: nil,
     ...>      dest_netmask: nil,
     ...>      dest_port: nil,
-    ...>      protocol: nil,
+    ...>      protocol: :tcp,
     ...>      source_ip: nil,
     ...>      source_netmask: nil,
     ...>      source_port: 2048
@@ -274,18 +275,16 @@ defmodule Eshe.Firewall do
     ...>      dest_ip: nil,
     ...>      dest_netmask: nil,
     ...>      dest_port: nil,
-    ...>      protocol: nil,
+    ...>      protocol: :tcp,
     ...>      source_ip: nil,
     ...>      source_netmask: nil,
     ...>      source_port: 8080
     ...>  }, <<4 :: size(4), 5 :: size(4), 0 :: size(88), 192, 168, 20, 10, 192, 168, 10, 10, 8, 00, 00, 80>>)
     false
   """
-  def match(record, <<version :: size(4), len :: size(4), _head :: size(88), source_ip :: size(32), dest_ip :: size(32), other0 :: binary>>) do
-    packet_len = len * 4 * 8
-    ip_header = 160 - packet_len
-    <<ip_options :: size(ip_header), other :: binary >> = other0
-    <<source_port :: size(16), dest_port :: size(16), _ :: binary>> = other
+  def match(%{protocol: protocol} = record, <<version :: size(4), len :: size(4), _head :: size(88), source_ip :: size(32), dest_ip :: size(32), other :: binary>>) when protocol in [:tcp, :udp] do
+    {source_port, dest_port} = fetch_port(len, other)
+
     with res <- match_ip([], record[:dest_ip], record[:dest_netmask], dest_ip),
      res <- match_ip(res, record[:source_ip], record[:source_netmask], source_ip),
      res <- match_port(res, record[:source_port], source_port),
@@ -300,6 +299,18 @@ defmodule Eshe.Firewall do
     end
   end
 
+  def match(record, <<version :: size(4), len :: size(4), _head :: size(88), source_ip :: size(32), dest_ip :: size(32), other :: binary>>) do
+    with res <- match_ip([], record[:dest_ip], record[:dest_netmask], dest_ip),
+     res <- match_ip(res, record[:source_ip], record[:source_netmask], source_ip),
+     res <- Enum.filter(res, &(&1 != nil)),
+    {:ok, _value} <- Enum.fetch(res, 0)
+    do
+      Enum.all?(res, fn r -> r == true end)
+    else
+      _ ->
+        false
+    end
+  end
   @doc """
 
     match ip address in firewall record filter
@@ -352,6 +363,9 @@ defmodule Eshe.Firewall do
     iex> Eshe.Firewall.match_port([], nil, 80)
     [nil]
 
+    iex> Eshe.Firewall.match_port([], 80, nil)
+    [nil]
+
     iex> Eshe.Firewall.match_port([], 80, 80)
     [true]
 
@@ -373,7 +387,11 @@ defmodule Eshe.Firewall do
     iex> Eshe.Firewall.match_port([], [8000, 8001, 8002, 8003, 8004], 8005)
     [false]
   """
-  def match_port(res, nil, port) do
+  def match_port(res, nil, _port) do
+      [nil| res]
+  end
+
+  def match_port(res, _port, nil) do
       [nil| res]
   end
 
@@ -413,5 +431,17 @@ defmodule Eshe.Firewall do
 
   def trace_to_integer_ip_addr(ip) do
     ip
+  end
+
+  defp fetch_port(len, data) do
+    packet_len = len * 4 * 8
+    ip_header = 160 - packet_len
+    <<ip_options :: size(ip_header), other :: binary >> = data
+    if byte_size(other) <= 4 do
+      <<source_port :: size(16), dest_port :: size(16), _ :: binary>> = other
+      {source_port, dest_port}
+    else
+      {nil, nil}
+    end
   end
 end

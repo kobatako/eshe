@@ -15,7 +15,7 @@ defmodule Eshe.FirewallTest do
       dest_ip: {192, 168, 10, 0},
       dest_netmask: {255, 255, 255, 0},
       dest_port: 80,
-      protocol: nil,
+      protocol: :tcp,
       source_ip: nil,
       source_netmask: nil,
       source_port: nil
@@ -26,7 +26,7 @@ defmodule Eshe.FirewallTest do
       dest_ip: {192, 168, 20, 0},
       dest_netmask: {255, 255, 255, 0},
       dest_port: 80,
-      protocol: nil,
+      protocol: :tcp,
       source_ip: nil,
       source_netmask: nil,
       source_port: nil
@@ -37,7 +37,7 @@ defmodule Eshe.FirewallTest do
       dest_ip: {192, 168, 10, 0},
       dest_netmask: {255, 255, 255, 0},
       dest_port: 8080,
-      protocol: nil,
+      protocol: :tcp,
       source_ip: nil,
       source_netmask: nil,
       source_port: nil
@@ -48,7 +48,7 @@ defmodule Eshe.FirewallTest do
       dest_ip: {192, 168, 20, 0},
       dest_netmask: {255, 255, 255, 0},
       dest_port: 8080,
-      protocol: nil,
+      protocol: :tcp,
       source_ip: nil,
       source_netmask: nil,
       source_port: nil
@@ -61,7 +61,7 @@ defmodule Eshe.FirewallTest do
       dest_ip: {192, 168, 10, 0},
       dest_netmask: {255, 255, 255, 0},
       dest_port: nil,
-      protocol: nil,
+      protocol: :tcp,
       source_ip: {192, 168, 20, 0},
       source_netmask: {255, 255, 255 ,0},
       source_port: nil
@@ -72,7 +72,7 @@ defmodule Eshe.FirewallTest do
       dest_ip: {192, 168, 20, 0},
       dest_netmask: {255, 255, 255, 0},
       dest_port: nil,
-      protocol: nil,
+      protocol: :tcp,
       source_ip: {192, 168, 20, 0},
       source_netmask: {255, 255, 255 ,0},
       source_port: nil
@@ -83,7 +83,7 @@ defmodule Eshe.FirewallTest do
       dest_ip: {192, 168, 10, 0},
       dest_netmask: {255, 255, 255, 0},
       dest_port: nil,
-      protocol: nil,
+      protocol: :tcp,
       source_ip: {192, 168, 30, 0},
       source_netmask: {255, 255, 255 ,0},
       source_port: nil
@@ -94,7 +94,7 @@ defmodule Eshe.FirewallTest do
       dest_ip: {192, 168, 20, 0},
       dest_netmask: {255, 255, 255, 0},
       dest_port: nil,
-      protocol: nil,
+      protocol: :tcp,
       source_ip: {192, 168, 30, 0},
       source_netmask: {255, 255, 255 ,0},
       source_port: nil
@@ -107,7 +107,7 @@ defmodule Eshe.FirewallTest do
       dest_ip: {192, 168, 10, 0},
       dest_netmask: {255, 255, 255, 0},
       dest_port: nil,
-      protocol: nil,
+      protocol: :tcp,
       source_ip: nil,
       source_netmask: nil,
       source_port: 2048
@@ -118,7 +118,7 @@ defmodule Eshe.FirewallTest do
       dest_ip: {192, 168, 20, 0},
       dest_netmask: {255, 255, 255, 0},
       dest_port: nil,
-      protocol: nil,
+      protocol: :tcp,
       source_ip: nil,
       source_netmask: nil,
       source_port: 2048
@@ -129,7 +129,7 @@ defmodule Eshe.FirewallTest do
       dest_ip: {192, 168, 10, 0},
       dest_netmask: {255, 255, 255, 0},
       dest_port: nil,
-      protocol: nil,
+      protocol: :tcp,
       source_ip: nil,
       source_netmask: nil,
       source_port: 80
@@ -140,7 +140,7 @@ defmodule Eshe.FirewallTest do
       dest_ip: {192, 168, 20, 0},
       dest_netmask: {255, 255, 255, 0},
       dest_port: nil,
-      protocol: nil,
+      protocol: :tcp,
       source_ip: nil,
       source_netmask: nil,
       source_port: 80
@@ -153,7 +153,7 @@ defmodule Eshe.FirewallTest do
       dest_ip: nil,
       dest_netmask: nil,
       dest_port: 80,
-      protocol: nil,
+      protocol: :tcp,
       source_ip: {192, 168, 20, 0},
       source_netmask: {255, 255, 255, 0},
       source_port: nil
@@ -164,7 +164,7 @@ defmodule Eshe.FirewallTest do
       dest_ip: nil,
       dest_netmask: nil,
       dest_port: 81,
-      protocol: nil,
+      protocol: :tcp,
       source_ip: {192, 168, 20, 0},
       source_netmask: {255, 255, 255, 0},
       source_port: nil
@@ -199,7 +199,7 @@ defmodule Eshe.FirewallTest do
       dest_ip: nil,
       dest_netmask: nil,
       dest_port: 80,
-      protocol: nil,
+      protocol: :tcp,
       source_ip: nil,
       source_netmask: nil,
       source_port: 2048
@@ -210,7 +210,7 @@ defmodule Eshe.FirewallTest do
       dest_ip: nil,
       dest_netmask: nil,
       dest_port: 81,
-      protocol: nil,
+      protocol: :tcp,
       source_ip: nil,
       source_netmask: nil,
       source_port: 2048
@@ -221,7 +221,7 @@ defmodule Eshe.FirewallTest do
       dest_ip: nil,
       dest_netmask: nil,
       dest_port: 80,
-      protocol: nil,
+      protocol: :tcp,
       source_ip: nil,
       source_netmask: nil,
       source_port: 2000
@@ -232,7 +232,7 @@ defmodule Eshe.FirewallTest do
       dest_ip: nil,
       dest_netmask: nil,
       dest_port: 81,
-      protocol: nil,
+      protocol: :tcp,
       source_ip: nil,
       source_netmask: nil,
       source_port: 2000
@@ -245,7 +245,7 @@ defmodule Eshe.FirewallTest do
       dest_ip: nil,
       dest_netmask: nil,
       dest_port: nil,
-      protocol: nil,
+      protocol: :tcp,
       source_ip: {192, 168, 20, 0},
       source_netmask: {255, 255, 255, 0},
       source_port: 2048
@@ -256,7 +256,7 @@ defmodule Eshe.FirewallTest do
       dest_ip: nil,
       dest_netmask: nil,
       dest_port: nil,
-      protocol: nil,
+      protocol: :tcp,
       source_ip: {192, 168, 30, 0},
       source_netmask: {255, 255, 255, 0},
       source_port: 2048
@@ -267,7 +267,7 @@ defmodule Eshe.FirewallTest do
       dest_ip: nil,
       dest_netmask: nil,
       dest_port: nil,
-      protocol: nil,
+      protocol: :tcp,
       source_ip: {192, 168, 20, 0},
       source_netmask: {255, 255, 255, 0},
       source_port: 2000
@@ -278,10 +278,67 @@ defmodule Eshe.FirewallTest do
       dest_ip: nil,
       dest_netmask: nil,
       dest_port: nil,
-      protocol: nil,
+      protocol: :tcp,
       source_ip: {192, 168, 30, 0},
       source_netmask: {255, 255, 255, 0},
       source_port: 2000
     }, @test_packet)
+  end
+
+  test "through allow filter" do
+    true_allow = {:allow_record,
+      %{
+        dest_ip: {192, 168, 10, 0},
+        dest_netmask: {255, 255, 255, 0},
+        dest_port: 80,
+        protocol: :tcp,
+        source_ip: nil,
+        source_netmask: nil,
+        source_port: nil
+      }
+    }
+    true_deny = {:deny_record,
+      %{
+        dest_ip: {192, 168, 10, 0},
+        dest_netmask: {255, 255, 255, 0},
+        dest_port: 80,
+        protocol: :tcp,
+        source_ip: nil,
+        source_netmask: nil,
+        source_port: nil
+      }
+    }
+    false_allow = {:allow_record,
+      %{
+        dest_ip: {192, 168, 20, 0},
+        dest_netmask: {255, 255, 255, 0},
+        dest_port: 80,
+        protocol: :tcp,
+        source_ip: nil,
+        source_netmask: nil,
+        source_port: nil
+      }
+    }
+    false_deny = {:deny_record,
+      %{
+        dest_ip: {192, 168, 20, 0},
+        dest_netmask: {255, 255, 255, 0},
+        dest_port: 80,
+        protocol: :tcp,
+        source_ip: nil,
+        source_netmask: nil,
+        source_port: nil
+      }
+    }
+
+    assert Eshe.Firewall.is_allow_filter([true_allow, true_deny], @test_packet) == :ok
+    assert Eshe.Firewall.is_allow_filter([true_allow, false_deny], @test_packet) == :ok
+    assert Eshe.Firewall.is_allow_filter([false_allow, true_deny], @test_packet) == {:error, :bad_match}
+    assert Eshe.Firewall.is_allow_filter([false_allow, false_deny], @test_packet) == :ok
+
+    assert Eshe.Firewall.is_allow_filter([true_deny, true_allow], @test_packet) == {:error, :bad_match}
+    assert Eshe.Firewall.is_allow_filter([true_deny, false_allow], @test_packet) == {:error, :bad_match}
+    assert Eshe.Firewall.is_allow_filter([false_deny, true_allow], @test_packet) == :ok
+    assert Eshe.Firewall.is_allow_filter([false_deny, false_allow], @test_packet) == :ok
   end
 end
