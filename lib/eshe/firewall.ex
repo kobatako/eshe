@@ -448,8 +448,7 @@ defmodule Eshe.Firewall do
     packet_len = len * 4 * 8
     ip_header = 160 - packet_len
     <<ip_options::size(ip_header), other::binary>> = data
-
-    if byte_size(other) <= 4 do
+    if byte_size(other) >= 4 do
       <<source_port::size(16), dest_port::size(16), _::binary>> = other
       {source_port, dest_port}
     else
