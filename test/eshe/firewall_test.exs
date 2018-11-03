@@ -408,18 +408,11 @@ defmodule Eshe.FirewallTest do
 
     assert Eshe.Firewall.is_allow_filter([true_allow, true_deny], @test_packet) == :ok
     assert Eshe.Firewall.is_allow_filter([true_allow, false_deny], @test_packet) == :ok
-
-    assert Eshe.Firewall.is_allow_filter([false_allow, true_deny], @test_packet) ==
-             {:error, :bad_match}
-
+    assert Eshe.Firewall.is_allow_filter([false_allow, true_deny], @test_packet) == {:error, :bad_match}
     assert Eshe.Firewall.is_allow_filter([false_allow, false_deny], @test_packet) == :ok
 
-    assert Eshe.Firewall.is_allow_filter([true_deny, true_allow], @test_packet) ==
-             {:error, :bad_match}
-
-    assert Eshe.Firewall.is_allow_filter([true_deny, false_allow], @test_packet) ==
-             {:error, :bad_match}
-
+    assert Eshe.Firewall.is_allow_filter([true_deny, true_allow], @test_packet) == {:error, :bad_match}
+    assert Eshe.Firewall.is_allow_filter([true_deny, false_allow], @test_packet) == {:error, :bad_match}
     assert Eshe.Firewall.is_allow_filter([false_deny, true_allow], @test_packet) == :ok
     assert Eshe.Firewall.is_allow_filter([false_deny, false_allow], @test_packet) == :ok
   end

@@ -26,38 +26,31 @@ defmodule Eshe.Supervisor do
     allow(
       source_ip: {192, 168, 20, 0},
       source_netmask: {255, 255, 255, 0},
-      protocol: :tcp
-    )
-
-    allow(
-      source_ip: {192, 168, 20, 0},
-      source_netmask: {255, 255, 255, 0},
       protocol: :ip
     )
-
     allow(
       source_ip: {192, 168, 40, 0},
       source_netmask: {255, 255, 255, 0},
       protocol: :tcp
-    )
-
-    allow(
-      source_ip: {192, 168, 40, 0},
-      source_netmask: {255, 255, 255, 0},
-      protocol: :ip
-    )
-
-    deny(
-      source_ip: {192, 168, 20, 0},
-      source_netmask: {255, 255, 255, 0},
-      dest_ip: {192, 168, 40, 0},
-      dest_netmask: {255, 255, 255, 0}
     )
 
     deny()
   end
 
   chaos :default do
+    loss(
+      source_ip: {192, 168, 20, 0},
+      source_netmask: {255, 255, 255, 0},
+      protocol: :tcp,
+      rate: 50
+    )
+    delay(
+      source_ip: {192, 168, 20, 0},
+      source_netmask: {255, 255, 255, 0},
+      protocol: :tcp,
+      milisec: 100,
+      rate: 100
+    )
     duplicate(
       source_ip: {192, 168, 20, 0},
       source_netmask: {255, 255, 255, 0},

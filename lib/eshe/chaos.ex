@@ -1,4 +1,8 @@
 defmodule Eshe.Chaos do
+  @moduledoc """
+
+  """
+
   @default_delay_record %{
     source_ip: nil,
     source_netmask: nil,
@@ -198,7 +202,6 @@ defmodule Eshe.Chaos do
   end
 
   def chaos_type_pipeline(pipe, data, option) do
-    IO.inspect(pipe)
     {:ok, data, option}
   end
 end
