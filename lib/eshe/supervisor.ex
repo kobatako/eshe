@@ -42,20 +42,26 @@ defmodule Eshe.Supervisor do
       source_ip: {192, 168, 20, 0},
       source_netmask: {255, 255, 255, 0},
       protocol: :tcp,
-      rate: 50
+      rate: 0
     )
     delay(
       source_ip: {192, 168, 20, 0},
       source_netmask: {255, 255, 255, 0},
       protocol: :tcp,
       milisec: 100,
-      rate: 100
+      rate: 0
     )
     duplicate(
       source_ip: {192, 168, 20, 0},
       source_netmask: {255, 255, 255, 0},
       protocol: :tcp,
-      rate: 100
+      rate: 0
+    )
+    tcp_ack(
+      source_ip: {192, 168, 20, 0},
+      source_netmask: {255, 255, 255, 0},
+      protocol: :tcp,
+      rate: 0
     )
   end
 
