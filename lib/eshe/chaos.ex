@@ -37,6 +37,17 @@ defmodule Eshe.Chaos do
     rate: 100
   }
 
+  @default_tcp_ack_record %{
+    source_ip: nil,
+    source_netmask: nil,
+    dest_ip: nil,
+    dest_netmask: nil,
+    source_port: nil,
+    dest_port: nil,
+    protocol: :tcp,
+    rate: 100
+  }
+
   defmacro chaos(identifier \\ :global, attrs \\ [], do: context) do
     do_chaos(identifier, attrs, context)
   end
@@ -46,6 +57,7 @@ defmodule Eshe.Chaos do
       Module.register_attribute(__MODULE__, :change_chaos, accumulate: true)
       Module.register_attribute(__MODULE__, :change_chaos_record, accumulate: true)
       Module.register_attribute(__MODULE__, :chaos_pipeline, accumulate: true)
+
       identifier = unquote(identifier)
       attrs = unquote(attrs)
 
@@ -91,6 +103,13 @@ defmodule Eshe.Chaos do
     end
   end
 
+  defmacro tcp_ack(c) do
+    quote do
+      c = unquote(c)
+      Eshe.Chaos.__tcp_ack__(__MODULE__, Map.new(c))
+    end
+  end
+
   def __delay__(module, c) do
     record = Map.merge(@default_delay_record, c)
     Module.put_attribute(module, :change_chaos_record, {:delay, record})
@@ -104,6 +123,11 @@ defmodule Eshe.Chaos do
   def __duplicate__(module, c) do
     record = Map.merge(@default_duplicate_record, c)
     Module.put_attribute(module, :change_chaos_record, {:duplicate, record})
+  end
+
+  def __tcp_ack__(module, c) do
+    record = Map.merge(@default_tcp_ack_record, c)
+    Module.put_attribute(module, :change_chaos_record, {:tcp_ack, record})
   end
 
   defmacro chaos_through(identifier) do
@@ -125,8 +149,7 @@ defmodule Eshe.Chaos do
 
   def chaos_pipeline(identifier) do
     chaos = fetch_pipeline(Eshe.Supervisor.chaos_pipeline(), identifier)
-
-    fn data, option ->
+      fn data, option ->
       case chaos_pipeline(chaos, data, option) do
         {:ok, data, option} ->
           {:ok, data, option}
@@ -201,7 +224,28 @@ defmodule Eshe.Chaos do
     end
   end
 
+  def chaos_type_pipeline({:tcp_ack, record}, data, option) do
+    if Eshe.Firewall.match(record, data) do
+      rate = record[:rate]
+      ran = trunc(:rand.uniform() * 100)
+      if rate >= ran and has_tcp_ack(data) == true do
+        {:error, {{:message, :chaos_type_tcp_ack}, {:record, record}, {:data, data}}}
+      else
+        {:ok, data, option}
+      end
+    else
+      {:ok, data, option}
+    end
+  end
+
   def chaos_type_pipeline(pipe, data, option) do
     {:ok, data, option}
+  end
+
+  def has_tcp_ack(<<_ :: size(72), 6, _ :: size(80), tcp :: size(106), _:: size(1), 1 :: size(1), _ :: binary>>) do
+    false
+  end
+  def has_tcp_ack(_) do
+    true
   end
 end

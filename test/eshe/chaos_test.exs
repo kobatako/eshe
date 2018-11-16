@@ -6,8 +6,18 @@ defmodule Eshe.ChaosTest do
   # dest ip     : 192.168.10.10
   # source port : 2048
   # dest port   : 80
-  @test_packet <<4::size(4), 5::size(4), 0::size(88), 192, 168, 20, 10, 192, 168, 10, 10, 8, 00,
-                 00, 80>>
+  @test_packet <<4::size(4), 5::size(4), 0::size(88),
+                192, 168, 20, 10, 192, 168, 10, 10,
+                8, 00, 00, 80>>
+
+
+  # source ip   : 192.168.20.10
+  # dest ip     : 192.168.10.10
+  # source port : 2048
+  # dest port   : 80
+  @test_packet_tcp <<4::size(4), 5::size(4), 0::size(64), 6, 0::size(16),
+                192, 168, 20, 10, 192, 168, 10, 10,
+                8, 00, 00, 80, 00, 00, 00, 00, 00, 00, 00, 00, 00, 40>>
 
   test "chaos type loss" do
     true_loss = %{
@@ -59,5 +69,20 @@ defmodule Eshe.ChaosTest do
       source_port: nil,
       rate: 100
     }}, @test_packet, %{}) == {:ok, @test_packet, %{}}
+  end
+
+  test "chaos type tcp ack" do
+    true_loss = %{
+      dest_ip: {192, 168, 10, 0},
+      dest_netmask: {255, 255, 255, 0},
+      dest_port: nil,
+      protocol: nil,
+      source_ip: nil,
+      source_netmask: nil,
+      source_port: nil,
+      rate: 100
+    }
+    assert Eshe.Chaos.chaos_type_pipeline({:tcp_ack, true_loss}, @test_packet_tcp, %{})
+                == {:error, {{:message, :chaos_type_tcp_ack}, {:record, true_loss}, {:data, @test_packet_tcp}}}
   end
 end
