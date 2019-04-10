@@ -1,6 +1,6 @@
 # Eshe
 
-**TODO: Add description**
+Eshe is brook module for elixir
 
 ## Installation
 
